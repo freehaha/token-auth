@@ -22,8 +22,9 @@ type TokenStore interface {
 }
 
 type MemoryTokenStore struct {
-	tokens map[string]*Token
-	salt   string
+	tokens   map[string]*Token
+	idTokens map[string]*Token
+	salt     string
 }
 
 type Token struct {
@@ -55,14 +56,20 @@ func (s *MemoryTokenStore) NewToken(id string) *Token {
 		Token:    strToken,
 		Id:       id,
 	}
+	oldT, ok := s.idTokens[id]
+	if ok {
+		delete(s.tokens, oldT.Token)
+	}
 	s.tokens[strToken] = t
+	s.idTokens[id] = t
 	return t
 }
 
 func NewMemoryTokenStore(salt string) *MemoryTokenStore {
 	return &MemoryTokenStore{
-		salt:   salt,
-		tokens: make(map[string]*Token),
+		salt:     salt,
+		tokens:   make(map[string]*Token),
+		idTokens: make(map[string]*Token),
 	}
 
 }
