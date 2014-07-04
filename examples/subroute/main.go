@@ -11,9 +11,10 @@ func main() {
 	memStore := tauth.NewMemoryTokenStore("salty")
 
 	r := mux.NewRouter()
-	r.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
-		t := memStore.NewToken("User1")
-		fmt.Fprintf(w, "hi User1, your token is %s", t.Token)
+	r.HandleFunc("/login/{id}", func(w http.ResponseWriter, req *http.Request) {
+		vars := mux.Vars(req)
+		t := memStore.NewToken(vars["id"])
+		fmt.Fprintf(w, "hi %s, your token is %s", vars["id"], t.Token)
 	})
 
 	rRestrict := mux.NewRouter()
