@@ -16,7 +16,7 @@ type TokenAuth struct {
 	UnauthorizedHandler http.HandlerFunc
 }
 
-type TokenAuthNegroni struct {
+type NegroniTokenAuth struct {
 	TokenAuth
 }
 
@@ -105,6 +105,19 @@ func NewTokenAuth(handler http.Handler, unauthorizedHandler http.HandlerFunc, st
 	return t
 }
 
+func NewNegroniTokenAuth(unauthorizedHandler http.HandlerFunc, store TokenStore) *NegroniTokenAuth {
+	t := &NegroniTokenAuth{
+		TokenAuth{
+			store:               store,
+			UnauthorizedHandler: unauthorizedHandler,
+		},
+	}
+	if t.UnauthorizedHandler == nil {
+		t.UnauthorizedHandler = DefaultUnauthorizedHandler
+	}
+	return t
+}
+
 /* wrap a HandlerFunc to be authenticated */
 func (t *TokenAuth) HandleFunc(handlerFunc http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -139,6 +152,17 @@ func (t *TokenAuth) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	context.Set(req, "token", token)
 	t.handler.ServeHTTP(w, req)
+}
+
+/* as Negroni middleware, implementing negroni.Handler */
+func (t *NegroniTokenAuth) ServeHTTP(w http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
+	token, err := t.authenticate(req)
+	if err != nil {
+		t.UnauthorizedHandler.ServeHTTP(w, req)
+		return
+	}
+	context.Set(req, "token", token)
+	next(w, req)
 }
 
 func Get(req *http.Request) *Token {
