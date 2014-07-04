@@ -83,6 +83,16 @@ func (s *MemoryTokenStore) CheckToken(strToken string) (*Token, error) {
 	return t, nil
 }
 
+/*
+	Returns a TokenAuth object implemting Handler interface
+
+	if a handler is given it proxies the request to the handler
+
+	if a unauthorizedHandler is provided, unauthorized requests will be handled by this HandlerFunc,
+	otherwise a default unauthorized handler is used.
+
+	store is the TokenStore that stores and verify the tokens
+*/
 func NewTokenAuth(handler http.Handler, unauthorizedHandler http.HandlerFunc, store TokenStore) *TokenAuth {
 	t := &TokenAuth{
 		handler:             handler,
