@@ -7,26 +7,25 @@ Golang http middleware to implement token-based authentications
 wrapping a Handler to enforce token verification with gorilla/mux
 ```go
 
-memStore := tauth.NewMemoryTokenStore("salty")
+memStore := memstore.New("salty")
 
 r := mux.NewRouter()
-/* requests to /login are not authenticated */
-r.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
-	t := memStore.NewToken("User1")
-	fmt.Fprintf(w, "hi User1, your token is %s", t.Token)
+r.HandleFunc("/login/{id}", func(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	t := memStore.NewToken(vars["id"])
+	fmt.Fprintf(w, "hi %s, your token is %s", vars["id"], t)
 })
 
 rRestrict := mux.NewRouter()
 s := rRestrict.PathPrefix("/restricted/").Subrouter()
 s.HandleFunc("/area", func(w http.ResponseWriter, req *http.Request) {
 	token := tauth.Get(req)
-	fmt.Fprintf(w, "hi %s", token.Id)
+	fmt.Fprintf(w, "hi %s", token.Claims("id"))
 })
-
-/* authenticate all this sub path */
 tokenAuth := tauth.NewTokenAuth(rRestrict, nil, memStore)
 r.PathPrefix("/restricted").Handler(tokenAuth)
 
+fmt.Println("listening at :3000")
 http.ListenAndServe(":3000", r)
 
 ```
@@ -36,19 +35,20 @@ or just wrap individual HandleFunc
 ```go
 
 mux := http.NewServeMux()
-memStore := tauth.NewMemoryTokenStore("salty")
+memStore := memstore.New("salty")
 tokenAuth := tauth.NewTokenAuth(nil, nil, memStore)
 
 mux.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
 	t := memStore.NewToken("User1")
-	fmt.Fprintf(w, "hi User1, your token is %s", t.Token)
+	fmt.Fprintf(w, "hi User1, your token is %s", t)
 })
 
 mux.HandleFunc("/restricted", tokenAuth.HandleFunc(func(w http.ResponseWriter, req *http.Request) {
 	token := tauth.Get(req)
-	fmt.Fprintf(w, "hi %s", token.Id)
+	fmt.Fprintf(w, "hi %s", token.Claims("id").(string))
 }))
 
+fmt.Println("listening at :3000")
 http.ListenAndServe(":3000", mux)
 
 ```
@@ -62,10 +62,12 @@ You can use your own token store by implementing tauth.TokenStore interface:
 
 ```go
 type TokenStore interface {
-	NewToken(id string) *Token
-	CheckToken(token string) (*Token, error)
+	NewToken(id interface{}) Token
+	CheckToken(token string) (Token, error)
 }
 ```
 
-#TODO
-* expire old tokens if new one is generated for the user
+#JWT (JSON Web Tokens)
+
+An token store implementation using (go-jwt)[https://github.com/dgrijalva/jwt-go] is also available.
+See example/jwt for example usage.
