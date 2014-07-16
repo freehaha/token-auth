@@ -24,6 +24,10 @@ type Token interface {
 	Claims(string) interface{}
 }
 
+type ClaimSetter interface {
+	SetClaim(string, interface{}) ClaimSetter
+}
+
 func DefaultUnauthorizedHandler(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(401)
 	fmt.Fprint(w, "unauthorized")

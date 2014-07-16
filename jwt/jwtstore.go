@@ -1,6 +1,7 @@
 package jwtstore
 
 import (
+	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/freehaha/token-auth"
 	"time"
@@ -19,8 +20,14 @@ func (t *JwtToken) Claims(key string) interface{} {
 	return t.Token.Claims[key]
 }
 
+func (t *JwtToken) SetClaim(key string, value interface{}) tauth.ClaimSetter {
+	t.Token.Claims[key] = value
+	return t
+}
+
 func (t *JwtToken) IsExpired() bool {
-	exp := time.Unix(t.Claims("exp").(int64), 0)
+	/* converted to float64 when parsed from JSON */
+	exp := time.Unix(int64(t.Claims("exp").(float64)), 0)
 	return time.Now().After(exp)
 }
 
@@ -32,7 +39,7 @@ func (t *JwtToken) String() string {
 func (s *JwtStore) NewToken(id interface{}) tauth.Token {
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
 	token.Claims["id"] = id.(string)
-	token.Claims["exp"] = time.Now().Add(time.Minute)
+	token.Claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 	t := &JwtToken{
 		tokenKey: s.tokenKey,
 		Token:    *token,
@@ -47,7 +54,11 @@ func (s *JwtStore) CheckToken(token string) (tauth.Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &JwtToken{s.tokenKey, *t}, nil
+	jtoken := &JwtToken{s.tokenKey, *t}
+	if jtoken.IsExpired() {
+		return nil, errors.New("Token expired")
+	}
+	return jtoken, nil
 }
 
 func New(tokenKey string) *JwtStore {
