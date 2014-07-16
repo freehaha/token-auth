@@ -38,7 +38,6 @@ func (t *JwtToken) String() string {
 
 func (s *JwtStore) NewToken(id interface{}) tauth.Token {
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
-	token.Claims["id"] = id.(string)
 	token.Claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 	t := &JwtToken{
 		tokenKey: s.tokenKey,

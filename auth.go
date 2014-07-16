@@ -21,11 +21,15 @@ type TokenStore interface {
 type Token interface {
 	IsExpired() bool
 	fmt.Stringer
-	Claims(string) interface{}
+	ClaimGetter
 }
 
 type ClaimSetter interface {
 	SetClaim(string, interface{}) ClaimSetter
+}
+
+type ClaimGetter interface {
+	Claims(string) interface{}
 }
 
 func DefaultUnauthorizedHandler(w http.ResponseWriter, req *http.Request) {
