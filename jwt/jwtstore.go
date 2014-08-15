@@ -8,7 +8,8 @@ import (
 )
 
 type JwtStore struct {
-	tokenKey []byte
+	tokenKey    []byte
+	expireAfter time.Duration
 }
 
 type JwtToken struct {
@@ -38,7 +39,7 @@ func (t *JwtToken) String() string {
 
 func (s *JwtStore) NewToken(id interface{}) *JwtToken {
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
-	token.Claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+	token.Claims["exp"] = time.Now().Add(s.expireAfter).Unix()
 	t := &JwtToken{
 		tokenKey: s.tokenKey,
 		Token:    *token,
@@ -60,8 +61,9 @@ func (s *JwtStore) CheckToken(token string) (tauth.Token, error) {
 	return jtoken, nil
 }
 
-func New(tokenKey string) *JwtStore {
+func New(tokenKey string, expireAfter time.Duration) *JwtStore {
 	return &JwtStore{
 		[]byte(tokenKey),
+		expireAfter,
 	}
 }

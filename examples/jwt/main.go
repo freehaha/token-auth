@@ -10,13 +10,14 @@ import (
 
 func main() {
 	mux := http.NewServeMux()
-	jwtstore := jwtstore.New("my-secret-key")
+	/* set secret and default expiration time */
+	jwtstore := jwtstore.New("my-secret-key", time.Minute*10)
 	tokenAuth := tauth.NewTokenAuth(nil, nil, jwtstore)
 
 	mux.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
 		t := jwtstore.NewToken("")
 		/* JwtToken implements the ClaimSetter interface */
-		/* default expiration time is 30 min, you can set the "exp" claim to modify it */
+		/* default expiration time is 10 min, you can set the "exp" claim to modify it */
 		t.SetClaim("id", "user1").
 			SetClaim("exp", time.Now().Add(time.Minute).Unix())
 
