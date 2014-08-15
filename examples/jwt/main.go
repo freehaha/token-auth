@@ -17,7 +17,7 @@ func main() {
 		t := jwtstore.NewToken("")
 		/* JwtToken implements the ClaimSetter interface */
 		/* default expiration time is 30 min, you can set the "exp" claim to modify it */
-		t.(tauth.ClaimSetter).SetClaim("id", "user1").
+		t.SetClaim("id", "user1").
 			SetClaim("exp", time.Now().Add(time.Minute).Unix())
 
 		fmt.Fprintf(w, "hi User1, your token is %s", t)
