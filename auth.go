@@ -14,7 +14,6 @@ type TokenAuth struct {
 }
 
 type TokenStore interface {
-	NewToken(id interface{}) Token
 	CheckToken(token string) (Token, error)
 }
 

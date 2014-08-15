@@ -51,7 +51,7 @@ func (s *MemoryTokenStore) generateToken(id string) []byte {
 }
 
 /* returns a new token with specific id */
-func (s *MemoryTokenStore) NewToken(id interface{}) tauth.Token {
+func (s *MemoryTokenStore) NewToken(id interface{}) *MemoryToken {
 	strId := id.(string)
 	bToken := s.generateToken(strId)
 	strToken := base64.URLEncoding.EncodeToString(bToken)

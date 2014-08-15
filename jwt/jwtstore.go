@@ -36,7 +36,7 @@ func (t *JwtToken) String() string {
 	return tokenStr
 }
 
-func (s *JwtStore) NewToken(id interface{}) tauth.Token {
+func (s *JwtStore) NewToken(id interface{}) *JwtToken {
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
 	token.Claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 	t := &JwtToken{
