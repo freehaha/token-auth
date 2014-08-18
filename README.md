@@ -62,7 +62,6 @@ You can use your own token store by implementing tauth.TokenStore interface:
 
 ```go
 type TokenStore interface {
-	NewToken(id interface{}) Token
 	CheckToken(token string) (Token, error)
 }
 ```
