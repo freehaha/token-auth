@@ -92,6 +92,7 @@ func (t *TokenAuth) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	context.Set(req, "token", token)
 	t.handler.ServeHTTP(w, req)
+	context.Clear(req)
 }
 
 func Get(req *http.Request) Token {

@@ -26,6 +26,7 @@ func (t *TokenAuth) ServeHTTP(w http.ResponseWriter, req *http.Request, next htt
 	}
 	context.Set(req, "token", token)
 	next(w, req)
+	context.Clear(req)
 }
 
 func Get(req *http.Request) *tauth.Token {
