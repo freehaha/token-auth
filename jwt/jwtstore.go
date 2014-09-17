@@ -61,7 +61,7 @@ func (s *JwtStore) NewToken(id interface{}) *JwtToken {
 }
 
 func (s *JwtStore) CheckToken(token string) (tauth.Token, error) {
-	t, err := jwt.Parse(token, func(token *jwt.Token) ([]byte, error) {
+	t, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		return s.tokenKey, nil
 	})
 	if err != nil {
