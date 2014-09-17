@@ -26,9 +26,22 @@ func (t *JwtToken) SetClaim(key string, value interface{}) tauth.ClaimSetter {
 	return t
 }
 
+func (t *JwtToken) Expiry() time.Time {
+	expt := t.Claims("exp")
+	var exp time.Time
+	switch t := expt.(type) {
+	case float64:
+		exp = time.Unix(int64(t), 0)
+	case int64:
+		exp = time.Unix(t, 0)
+	default:
+		exp = time.Now()
+	}
+	return exp
+}
+
 func (t *JwtToken) IsExpired() bool {
-	/* converted to float64 when parsed from JSON */
-	exp := time.Unix(int64(t.Claims("exp").(float64)), 0)
+	exp := t.Expiry()
 	return time.Now().After(exp)
 }
 
