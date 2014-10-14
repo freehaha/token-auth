@@ -19,7 +19,7 @@ func main() {
 		/* JwtToken implements the ClaimSetter interface */
 		/* default expiration time is 10 min, you can set the "exp" claim to modify it */
 		t.SetClaim("id", "user1").
-			SetClaim("exp", time.Now().Add(time.Minute).Unix())
+			SetClaim("exp", time.Now().Add(time.Minute * 10).Unix())
 
 		fmt.Fprintf(w, "hi User1, your token is %s", t)
 	})
