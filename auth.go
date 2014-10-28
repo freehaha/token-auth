@@ -10,7 +10,12 @@ import (
 type TokenAuth struct {
 	handler             http.Handler
 	store               TokenStore
+	getter              TokenGetter
 	UnauthorizedHandler http.HandlerFunc
+}
+
+type TokenGetter interface {
+	GetTokenFromRequest(req *http.Request) string
 }
 
 type TokenStore interface {
@@ -36,6 +41,20 @@ func DefaultUnauthorizedHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, "unauthorized")
 }
 
+type QueryStringTokenGetter struct {
+	Parameter string
+}
+
+func (q QueryStringTokenGetter) GetTokenFromRequest(req *http.Request) string {
+	return req.URL.Query().Get(q.Parameter)
+}
+
+func NewQueryStringTokenGetter(parameter string) *QueryStringTokenGetter {
+	return &QueryStringTokenGetter{
+		Parameter: parameter,
+	}
+}
+
 /*
 	Returns a TokenAuth object implemting Handler interface
 
@@ -46,11 +65,15 @@ func DefaultUnauthorizedHandler(w http.ResponseWriter, req *http.Request) {
 
 	store is the TokenStore that stores and verify the tokens
 */
-func NewTokenAuth(handler http.Handler, unauthorizedHandler http.HandlerFunc, store TokenStore) *TokenAuth {
+func NewTokenAuth(handler http.Handler, unauthorizedHandler http.HandlerFunc, store TokenStore, getter TokenGetter) *TokenAuth {
 	t := &TokenAuth{
 		handler:             handler,
 		store:               store,
+		getter:              getter,
 		UnauthorizedHandler: unauthorizedHandler,
+	}
+	if t.getter == nil {
+		t.getter = NewQueryStringTokenGetter("token")
 	}
 	if t.UnauthorizedHandler == nil {
 		t.UnauthorizedHandler = DefaultUnauthorizedHandler
@@ -72,7 +95,7 @@ func (t *TokenAuth) HandleFunc(handlerFunc http.HandlerFunc) http.HandlerFunc {
 }
 
 func (t *TokenAuth) Authenticate(req *http.Request) (Token, error) {
-	strToken := req.URL.Query().Get("token")
+	strToken := t.getter.GetTokenFromRequest(req)
 	if strToken == "" {
 		return nil, errors.New("token required")
 	}

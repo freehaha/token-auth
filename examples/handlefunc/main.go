@@ -10,7 +10,7 @@ import (
 func main() {
 	mux := http.NewServeMux()
 	memStore := memstore.New("salty")
-	tokenAuth := tauth.NewTokenAuth(nil, nil, memStore)
+	tokenAuth := tauth.NewTokenAuth(nil, nil, memStore, nil)
 
 	mux.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
 		t := memStore.NewToken("User1")

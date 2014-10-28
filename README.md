@@ -22,7 +22,7 @@ s.HandleFunc("/area", func(w http.ResponseWriter, req *http.Request) {
 	token := tauth.Get(req)
 	fmt.Fprintf(w, "hi %s", token.Claims("id"))
 })
-tokenAuth := tauth.NewTokenAuth(rRestrict, nil, memStore)
+tokenAuth := tauth.NewTokenAuth(rRestrict, nil, memStore, nil)
 r.PathPrefix("/restricted").Handler(tokenAuth)
 
 fmt.Println("listening at :3000")
@@ -36,7 +36,7 @@ or just wrap individual HandleFunc
 
 mux := http.NewServeMux()
 memStore := memstore.New("salty")
-tokenAuth := tauth.NewTokenAuth(nil, nil, memStore)
+tokenAuth := tauth.NewTokenAuth(nil, nil, memStore, nil)
 
 mux.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
 	t := memStore.NewToken("User1")
@@ -54,6 +54,18 @@ http.ListenAndServe(":3000", mux)
 ```
 
 Complete examples are in the example/ folder
+
+#TokenGetter
+
+An implementation of the `TokenGetter` interface gets a token from a request.
+There is a simple implementation of this interface included, which retrieves the
+token from a query string parameter.
+
+```go
+type TokenGetter interface {
+	GetTokenFromRequest(req *http.Request) string
+}
+```
 
 #TokenStore
 

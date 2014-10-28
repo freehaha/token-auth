@@ -10,9 +10,9 @@ type TokenAuth struct {
 	auth *tauth.TokenAuth
 }
 
-func NewTokenAuth(unauthorizedHandler http.HandlerFunc, store tauth.TokenStore) *TokenAuth {
+func NewTokenAuth(unauthorizedHandler http.HandlerFunc, store tauth.TokenStore, getter tauth.TokenGetter) *TokenAuth {
 	t := &TokenAuth{
-		auth: tauth.NewTokenAuth(nil, unauthorizedHandler, store),
+		auth: tauth.NewTokenAuth(nil, unauthorizedHandler, store, getter),
 	}
 	return t
 }

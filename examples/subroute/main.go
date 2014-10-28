@@ -24,7 +24,7 @@ func main() {
 		token := tauth.Get(req)
 		fmt.Fprintf(w, "hi %s", token.Claims("id"))
 	})
-	tokenAuth := tauth.NewTokenAuth(rRestrict, nil, memStore)
+	tokenAuth := tauth.NewTokenAuth(rRestrict, nil, memStore, nil)
 	r.PathPrefix("/restricted").Handler(tokenAuth)
 
 	fmt.Println("listening at :3000")
