@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/context"
 	"net/http"
+	"strings"
 )
 
 type TokenAuth struct {
@@ -53,6 +54,16 @@ func NewQueryStringTokenGetter(parameter string) *QueryStringTokenGetter {
 	return &QueryStringTokenGetter{
 		Parameter: parameter,
 	}
+}
+
+type BearerGetter struct{}
+
+func (b *BearerGetter) GetTokenFromRequest(req *http.Request) string {
+	authStr := req.Header.Get("Authorization")
+	if !strings.HasPrefix(authStr, "Bearer ") {
+		return ""
+	}
+	return authStr[7:]
 }
 
 /*
