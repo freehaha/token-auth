@@ -80,5 +80,5 @@ type TokenStore interface {
 
 #JWT (JSON Web Tokens)
 
-An token store implementation using (go-jwt)[https://github.com/dgrijalva/jwt-go] is also available.
+An token store implementation using [go-jwt](https://github.com/dgrijalva/jwt-go) is also available.
 See example/jwt for example usage.
